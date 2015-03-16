@@ -1,9 +1,18 @@
 __author__ = 'DatHuynh'
 from deap import base, creator,tools
-import numpy as np
 import random
 import Network as nw
 import DataSetGenerator as dg
+
+sizes = [3,4,1]
+
+def createNetwork():
+    return nw.Network(sizes,0.01,0.001)
+
+def evaluate(individual):
+    net = individual[0]
+    net.GD(trainingdata,testdata[:100],10)
+    return net.evaluate(testdata),
 
 def cxTwoPointCopy(ind1, ind2):
     """Execute a two points crossover with copy on the input individuals. The
@@ -33,32 +42,20 @@ def cxTwoPointCopy(ind1, ind2):
 
     return ind1, ind2
 
-
-trainingdata = dg.generateTrainingData()
-testdata = dg.generateTestData()
-
 creator.create("FitnessMin",base.Fitness,weights = (-0.1,))
 creator.create("Individual",list,fitness = creator.FitnessMin)
-
-IND_SIZE = 12
-sizes = [3,4,1]
-
-def createNetwork():
-    return nw.Network(sizes,0.01,0.001)
 
 toolbox = base.Toolbox()
 toolbox.register("individual",tools.initRepeat,creator.Individual, createNetwork,1)
 toolbox.register("population",tools.initRepeat,list,toolbox.individual)
 
-def evaluate(individual):
-    net = individual[0]
-    net.GD(trainingdata,testdata,125)
-    return net.evaluate(testdata),
-
 toolbox.register("mate", cxTwoPointCopy)
 toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", evaluate)
+
+trainingdata = dg.generateTrainingData()
+testdata = dg.generateTestData()
 
 def convertToWeights(array,weights):
     m = 0
@@ -82,16 +79,8 @@ def weightGA():
         if i != len(sizes) - 1:
             nW = sizes[i]*sizes[i+1]
         nB += sizes[i]
-    '''
-    print('Initializing')
-    for i,e in enumerate(pop):
-        net = nw.Network(sizes,0.01,0.001)
-        net.GD(trainingdata,testdata,1)
-        networks.append(net)
-        pop[i].fitness.values = net.evaluate(testdata)
-        print(pop[i].fitness)
-    '''
-    CXPB, MUTPB, NGEN = 0.5, 0.2, 100
+
+    CXPB, MUTPB, NGEN = 0.5, 0.2, 1250
 
     print('Initializing')
     # Evaluate the entire population
@@ -157,17 +146,5 @@ def weightGA():
 
         # The population is entirely replaced by the offspring
         pop[:] = offspring
-        '''
-        for i,e in enumerate(pop):
-            net = networks[i]
-            convertToWeights(e,net.weights)
-            net.GD(trainingdata,testdata,1)
-            convertToArray(net.weights,pop[i])
-            pop[i].fitness.values = net.evaluate(testdata)
-            if(pop[i].fitness.values < pop[bestInd].fitness.values):
-                bestInd = i
-        print(pop[bestInd].fitness)
-        print('end generation')
-        '''
     return bestInd[0][0]
 
