@@ -37,10 +37,10 @@ def cxTwoPointCopy(ind1, ind2):
     return ind1, ind2
 
 def evaluate(ps,net,us):
-    us_net = net.feedforward(ps)
+    us_net = net.feedforward(np.reshape(ps,(len(ps),1)))
     r_dg,r_net = 0,0
-    for i in range(us):
-        r_net = np.power((us_net[i] - us[i])/us[i],2)
+    for i in range(len(us)):
+        r_net += np.power((us_net[i] - us[i])/us[i],2)
     return np.sqrt(r_net/len(us))
 
 creator.create("FitnessMin",base.Fitness,weights = (-0.1,))
@@ -55,11 +55,11 @@ toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 def paraGA(net,us):
-    pop = toolbox.population(n=50)
+    pop = toolbox.population(n=1000)
     for ind in pop:
         ind.fitness.values = evaluate(ind,net,us)
 
-    CXPB, MUTPB, NGEN = 0.5, 0.2, 100
+    CXPB, MUTPB, NGEN = 0.5, 0.2, 50
 
     for g in range(NGEN):
 
@@ -93,4 +93,4 @@ def paraGA(net,us):
 
         # The population is entirely replaced by the offspring
         pop[:] = offspring
-    return bestInd[0]
+    return np.reshape(bestInd[0],(len(bestInd[0]),1))

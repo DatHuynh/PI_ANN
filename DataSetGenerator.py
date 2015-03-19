@@ -15,7 +15,8 @@ def computeMeasure2(kdp, kdr, xD, xd):
 
 
 def computeUs(p1, p2, p3):
-    u = np.sin(p1 * 3.14 / 2) * np.exp(p2) / (p3 * 30)
+    #u = np.sin(p1 * 3.14 / 2) * np.exp(p2)/2 + np.sqrt(p3 * 30)/11
+    u = np.sin(p1 * 3.14 / 2) * np.exp(p2)/(p3 * 30)
     return u
 
 

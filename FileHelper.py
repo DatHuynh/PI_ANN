@@ -7,7 +7,7 @@ def arr2json(arr):
 
 
 def json2arr(data):
-    return np.array(json.loads(data))
+    return np.array(json.loads(data),dtype = np.float64)
 
 
 def saveWeightJson(weights ,filename):

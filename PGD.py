@@ -9,15 +9,17 @@ def optimizePs(ps,net,us,epoch):
         delta = PGD(ps,net,us)
         ps = updatePs(ps,delta)
         print(evaluate(ps,net,us))
+        print(ps)
 
 def evaluate(ps,net,us):
-    us_dg = dg.computeUs(ps[0],ps[1],ps[3])
+    us_dg = dg.computeUs(ps[0],ps[1],ps[2])
     us_net = net.feedforward(ps)
     r_dg,r_net = 0,0
-    for i in range(us):
-        r_dg = np.power((us_dg[i] - us[i])/us[i],2)
-        r_net = np.power((us_net[i] - us[i])/us[i],2)
-    tolerance = np.abs(np.sqrt(r_dg/len(us)) - np.sqrt(r_net/len(us)))
+    for i in range(len(us)):
+        r_dg += np.power((us_dg[i] - us[i])/us[i],2)
+        r_net += np.power((us_net[i] - us[i])/us[i],2)
+    '''np.sqrt(r_dg/len(us)) - '''
+    tolerance = np.abs(np.sqrt(r_net/len(us)))
     return tolerance
 
 def PGD(ps, net, us):
@@ -39,7 +41,7 @@ def PGD(ps, net, us):
     return delta
 
 def updatePs(ps,delta):
-    ps = [p + deltap for p,deltap in zip(ps,delta)]
+    ps = [p - 0.01*deltap for p,deltap in zip(ps,delta)]
     return ps
 def sigmoid(z):
     return 1.0/(1.0 + np.exp(-z))
@@ -51,6 +53,6 @@ def sigmoid_prime(z):
 
 sigmoid_prime_vec = np.vectorize(sigmoid_prime)
 
-def cost_derivative(self,activation,y):
+def cost_derivative(activation,y):
         return 2*(activation-y)/(y*y)
         #return 2*(activation-y)
