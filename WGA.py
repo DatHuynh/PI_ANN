@@ -4,31 +4,15 @@ import random
 import Network as nw
 import DataSetGenerator as dg
 
-sizes = [3,4,1]
-
-def createNetwork():
+def createNetwork(sizes):
     return nw.Network(sizes,0.01,0.001)
 
-def evaluate(individual):
+def evaluate(individual,trainingdata,testdata,numGDMStep):
     net = individual[0]
-    net.GD(trainingdata,testdata[:100],10)
+    net.GD(trainingdata,testdata,numGDMStep)
     return net.evaluate(testdata),
 
 def cxTwoPointCopy(ind1, ind2):
-    """Execute a two points crossover with copy on the input individuals. The
-    copy is required because the slicing in numpy returns a view of the data,
-    which leads to a self overwritting in the swap operation. It prevents
-    ::
-
-        >>> import numpy
-        >>> a = numpy.array((1,2,3,4))
-        >>> b = numpy.array((5.6.7.8))
-        >>> a[1:3], b[1:3] = b[1:3], a[1:3]
-        >>> print(a)
-        [1 6 7 4]
-        >>> print(b)
-        [5 6 7 8]
-    """
     size = len(ind1)
     cxpoint1 = random.randint(1, size)
     cxpoint2 = random.randint(1, size - 1)
@@ -41,21 +25,6 @@ def cxTwoPointCopy(ind1, ind2):
         = ind2[cxpoint1:cxpoint2].copy(), ind1[cxpoint1:cxpoint2].copy()
 
     return ind1, ind2
-
-creator.create("FitnessMin",base.Fitness,weights = (-0.1,))
-creator.create("Individual",list,fitness = creator.FitnessMin)
-
-toolbox = base.Toolbox()
-toolbox.register("individual",tools.initRepeat,creator.Individual, createNetwork,1)
-toolbox.register("population",tools.initRepeat,list,toolbox.individual)
-
-toolbox.register("mate", cxTwoPointCopy)
-toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
-toolbox.register("select", tools.selTournament, tournsize=3)
-toolbox.register("evaluate", evaluate)
-
-trainingdata = dg.generateTrainingData()
-testdata = dg.generateTestData()
 
 def convertToWeights(array,weights):
     m = 0
@@ -71,26 +40,54 @@ def convertToArray(weights,array):
             array[m:m+len(e)] = weights[i][k]
             m+= len(e)
 
-def weightGA():
-    pop = toolbox.population(n=50)
-    networks = []
+def weightGA(sizes,trainingdata,testdata,numIndividual,numGeneration,numGDMStep,crossOverPB, mutantPB):
+
+    print('Weight GA')
+
+    creator.create("FitnessMin",base.Fitness,weights = (-0.1,))
+    creator.create("Individual",list,fitness = creator.FitnessMin)
+
+    toolbox = base.Toolbox()
+    toolbox.register("Init",createNetwork,sizes)
+    toolbox.register("individual",tools.initRepeat,creator.Individual, toolbox.Init,1)
+    toolbox.register("population",tools.initRepeat,list,toolbox.individual)
+
+    toolbox.register("mate", cxTwoPointCopy)
+    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
+    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("evaluate",evaluate,trainingdata = trainingdata, testdata = testdata,numGDMStep = numGDMStep)
+
+    pop = toolbox.population(n=numIndividual)
     nW,nB = 0,0
     for i in range(len(sizes)):
         if i != len(sizes) - 1:
-            nW = sizes[i]*sizes[i+1]
-        nB += sizes[i]
+            nW += sizes[i]*sizes[i+1]
+        if i != 0:
+            nB += sizes[i]
 
-    CXPB, MUTPB, NGEN = 0.5, 0.2, 1250
+    #CXPB, MUTPB= 0.5, 0.2
 
     print('Initializing')
     # Evaluate the entire population
     fitnesses = map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
+    '''
+    for ind in pop:
+        ind.fitness.values = evaluate(ind,trainindata,testdata)
+    '''
     bestInd = tools.selBest(pop,1)
     print(bestInd[0].fitness)
 
-    for g in range(NGEN):
+    wlist1 = [0 for i in range(nW)]
+    wlist2 = [0 for i in range(nW)]
+    blist1 = [0 for i in range(nB)]
+    blist2 = [0 for i in range(nB)]
+
+    wlist = [0 for i in range(nW)]
+    blist = [0 for i in range(nB)]
+
+    for g in range(numGeneration):
 
 
         # Select the next generation individuals
@@ -100,11 +97,7 @@ def weightGA():
 
         # Apply crossover and mutation on the offspring
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() < CXPB:
-                wlist1 = [0 for i in range(nW)]
-                wlist2 = [0 for i in range(nW)]
-                blist1 = [0 for i in range(nB)]
-                blist2 = [0 for i in range(nB)]
+            if random.random() < crossOverPB:
                 net1 = child1[0]
                 net2 = child2[0]
                 convertToArray(net1.weights,wlist1)
@@ -121,9 +114,7 @@ def weightGA():
                 del child2.fitness.values
 
         for mutant in offspring:
-            if random.random() < MUTPB:
-                wlist = [0 for i in range(nW)]
-                blist = [0 for i in range(nB)]
+            if random.random() < mutantPB:
                 net = mutant[0]
                 convertToArray(net.weights,wlist)
                 convertToArray(net.biases,blist)
@@ -137,8 +128,9 @@ def weightGA():
 
         print('generation {}'.format(g))
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = map(toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, fitnesses):
+
+        fitnesses = map(toolbox.evaluate, pop)
+        for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit
 
         bestInd = tools.selBest(pop,1)

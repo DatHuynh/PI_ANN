@@ -13,25 +13,19 @@ us = np.reshape(dg.computeUs(answerPs[0],answerPs[1],answerPs[2]),(1,1))
 trainingdata = dg.generateTrainingData()
 testdata = dg.generateTestData()
 
-'''
-net1 =  network1.Network([3,3,40])
-net1.SGD(trainingdata,100000,8,1,testdata)
-print(net1.evaluate(testdata))
-'''
-'''
-net2 = WGA.weightGA()
-fh.saveWeightJson(net2.weights,"WeightsRaw")
-fh.saveWeightJson(net2.biases,"BiasesRaw")
-'''
-net2 = nw.Network(sizes,0.01,0.001)
-net2.weights = fh.loadWeightJson("WeightsRaw")
-net2.biases = fh.loadWeightJson("BiasesRaw")
-'''
-#net2.GD(trainingdata,testdata[:100],1000,True)
-#fh.saveWeightJson(net2.weights,"WeightsOpti")
-#fh.saveWeightJson(net2.biases,"BiasesOpti")
-'''
-ps = PGA.paraGA(net2,us)
+net = WGA.weightGA(sizes,trainingdata,testdata[100:200],50,1250,10,0.5,0.3)
+fh.saveWeightJson(net.weights,"WeightsRaw")
+fh.saveWeightJson(net.biases,"BiasesRaw")
 
-PGD.optimizePs(ps,net2,us,100000)
-#net2.feedforward(np.reshape([0.1,0.1,0.3],(3,1)))
+net = nw.Network(sizes,0.01,0.001)
+net.weights = fh.loadWeightJson("WeightsRaw")
+net.biases = fh.loadWeightJson("BiasesRaw")
+
+net.GD(trainingdata,testdata[:100],1000,True)
+#fh.saveWeightJson(net.weights,"WeightsOpti")
+#fh.saveWeightJson(net.biases,"BiasesOpti")
+
+ps = PGA.paraGA(net,us)
+
+PGD.optimizePs(ps,net,us,100000)
+#net.feedforward(np.reshape([0.1,0.1,0.3],(3,1)))

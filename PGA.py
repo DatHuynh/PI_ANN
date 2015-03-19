@@ -6,23 +6,7 @@ import numpy as np
 import Network as nw
 import DataSetGenerator as dg
 
-sizes = [3,4,1]
-
 def cxTwoPointCopy(ind1, ind2):
-    """Execute a two points crossover with copy on the input individuals. The
-    copy is required because the slicing in numpy returns a view of the data,
-    which leads to a self overwritting in the swap operation. It prevents
-    ::
-
-        >>> import numpy
-        >>> a = numpy.array((1,2,3,4))
-        >>> b = numpy.array((5.6.7.8))
-        >>> a[1:3], b[1:3] = b[1:3], a[1:3]
-        >>> print(a)
-        [1 6 7 4]
-        >>> print(b)
-        [5 6 7 8]
-    """
     size = len(ind1)
     cxpoint1 = random.randint(1, size)
     cxpoint2 = random.randint(1, size - 1)
@@ -43,21 +27,25 @@ def evaluate(ps,net,us):
         r_net += np.power((us_net[i] - us[i])/us[i],2)
     return np.sqrt(r_net/len(us))
 
-creator.create("FitnessMin",base.Fitness,weights = (-0.1,))
-creator.create("Individual",np.ndarray,fitness = creator.FitnessMin)
 
-toolbox = base.Toolbox()
-toolbox.register("individual",tools.initRepeat,creator.Individual, random.random,sizes[0])
-toolbox.register("population",tools.initRepeat,list,toolbox.individual)
+def paraGA(length,net,us):
 
-toolbox.register("mate", cxTwoPointCopy)
-toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
-toolbox.register("select", tools.selTournament, tournsize=3)
+    creator.create("FitnessMin",base.Fitness,weights = (-0.1,))
+    creator.create("Individual",np.ndarray,fitness = creator.FitnessMin)
 
-def paraGA(net,us):
+    toolbox = base.Toolbox()
+    toolbox.register("individual",tools.initRepeat,creator.Individual, random.random,length)
+    toolbox.register("population",tools.initRepeat,list,toolbox.individual)
+
+    toolbox.register("mate", cxTwoPointCopy)
+    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
+    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("evaluate",evaluate,net = net,us = us)
+
     pop = toolbox.population(n=1000)
-    for ind in pop:
-        ind.fitness.values = evaluate(ind,net,us)
+    fitness = map(toolbox.evaluate,pop)
+    for ind,fit in zip(pop,fitness):
+        ind.fitness.values = fit
 
     CXPB, MUTPB, NGEN = 0.5, 0.2, 50
 
@@ -85,8 +73,9 @@ def paraGA(net,us):
 
         print('generation {}'.format(g))
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        for ind in invalid_ind:
-            ind.fitness.values = evaluate(ind,net,us)
+        fitness = map(toolbox.evaluate,pop)
+        for ind,fit in zip(pop,fitness):
+            ind.fitness.values = fit
 
         bestInd = tools.selBest(pop,1)
         print(bestInd[0].fitness)

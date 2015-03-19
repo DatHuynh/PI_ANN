@@ -60,9 +60,9 @@ def computeX(p1,p2):
 
 def generateTrainingData():
     dataset = []
-    p1s = [0.1,0.5,0.9]
-    p2s = [0.1,0.5,0.9]
-    p3s = [0.1,0.5,0.9]
+    p1s = [0.1,0.2,0.3,0.4,0.5,0.7]
+    p2s = [0.1,0.2,0.3,0.4,0.5,0.7]
+    p3s = [0.1,0.2,0.3,0.4,0.5,0.7]
     for p1 in p1s:
         for p2 in p2s:
             for p3 in p3s:
