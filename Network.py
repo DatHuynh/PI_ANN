@@ -21,16 +21,17 @@ class Network:
             error_t_w, error_t_b = self.backProp(dataset)
             error_b = [b + deltab for b, deltab in zip(error_b, error_t_b)]
             error_w = [w + deltaw for w, deltaw in zip(error_w, error_t_w)]
-        self.weights = [w - 0.001*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
-        self.biases = [b - 0.001*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
+        self.weights = [w - 0.01*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
+        self.biases = [b - 0.01*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
 
     def GD(self, training_data, test_data, epoch, isReport = False):
         for i in range(epoch):
             self.updateNetwork(training_data)
             if isReport is True:
-                v = self.evaluate(test_data)
-                print("Let see {}".format(v))
-                if v < np.power(self.threshold,2):
+                test_error = self.evaluate(test_data)
+                train_error = self.evaluate(training_data)
+                print("Let see test: {} train: {}".format(test_error,train_error))
+                if test_error < np.power(self.threshold,2):
                     print('Debug')
             if self.isTerminate(training_data):
                 return 1
@@ -101,11 +102,11 @@ class Network:
             #rd += np.power(y-a,2)
         return rd/len(activation)
 
-    def evaluate(self,testdata):
+    def evaluate(self,dataset):
         rt = 0
-        for x,y in testdata:
+        for x,y in dataset:
             rt += self.cost(self.feedforward(x),y)
-        return np.sqrt(rt/len(testdata))
+        return np.sqrt(rt/len(dataset))
 
 def sigmoid(z):
     return 1.0/(1.0 + np.exp(-z))

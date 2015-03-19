@@ -60,14 +60,20 @@ def computeX(p1,p2):
 
 def generateTrainingData():
     dataset = []
-    p1s = [0.1,0.2,0.3,0.4,0.5,0.7]
-    p2s = [0.1,0.2,0.3,0.4,0.5,0.7]
-    p3s = [0.1,0.2,0.3,0.4,0.5,0.7]
+    p1s = [0.1,0.9]
+    p2s = [0.1,0.9]
+    p3s = [0.1,0.9]
     for p1 in p1s:
         for p2 in p2s:
             for p3 in p3s:
                 #for p4 in range (1,11,1):
                 dataset.append(generateData(p1,p2,p3,0.35))
+
+    #scatter data
+    dataset.append(generateData(0.33,0.44,0.55,0.35))
+    dataset.append(generateData(0.12,0.35,0.69,0.35))
+    dataset.append(generateData(0.08,0.24,0.66,0.35))
+    dataset.append(generateData(0.15,0.11,0.36,0.35))
     return dataset
 
 

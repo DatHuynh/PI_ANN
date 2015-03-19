@@ -10,7 +10,7 @@ def createNetwork(sizes):
 def evaluate(individual,trainingdata,testdata,numGDMStep):
     net = individual[0]
     net.GD(trainingdata,testdata,numGDMStep)
-    return net.evaluate(testdata),
+    return net.evaluate(trainingdata),
 
 def cxTwoPointCopy(ind1, ind2):
     size = len(ind1)
