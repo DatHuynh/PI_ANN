@@ -7,9 +7,9 @@ import DataSetGenerator as dg
 def createNetwork(sizes):
     return nw.Network(sizes,0.01,0.001)
 
-def evaluate(individual,trainingdata,testdata,numGDMStep):
+def evaluate(individual,trainingdata,testdata,numGDMStep,eta):
     net = individual[0]
-    net.GD(trainingdata,testdata,numGDMStep)
+    net.GD(trainingdata,testdata,numGDMStep,eta)
     return net.evaluate(trainingdata),
 
 def cxTwoPointCopy(ind1, ind2):
@@ -40,7 +40,7 @@ def convertToArray(weights,array):
             array[m:m+len(e)] = weights[i][k]
             m+= len(e)
 
-def weightGA(sizes,trainingdata,testdata,numIndividual,numGeneration,numGDMStep,crossOverPB, mutantPB):
+def weightGA(sizes,trainingdata,testdata,eta ,numIndividual,numGeneration,numGDMStep,crossOverPB, mutantPB):
 
     print('Weight GA')
 
@@ -75,10 +75,10 @@ def weightGA(sizes,trainingdata,testdata,numIndividual,numGeneration,numGDMStep,
         ind.fitness.values = fit
     '''
     for ind in pop:
-        ind.fitness.values = evaluate(ind,trainingdata,testdata,numGDMStep)
+        ind.fitness.values = evaluate(ind,trainingdata,testdata,numGDMStep,eta)
 
     bestInd = tools.selBest(pop,1)
-    print(bestInd[0].fitness)
+    print("TrainData: {} TestData: {}".format(bestInd[0].fitness,bestInd[0][0].evaluate(testdata)))
 
     wlist1 = [0 for i in range(nW)]
     wlist2 = [0 for i in range(nW)]
@@ -89,8 +89,7 @@ def weightGA(sizes,trainingdata,testdata,numIndividual,numGeneration,numGDMStep,
     blist = [0 for i in range(nB)]
 
     for g in range(numGeneration):
-
-
+        print('generation {}'.format(g))
         # Select the next generation individuals
         offspring = toolbox.select(pop, len(pop))
         # Clone the selected individuals
@@ -126,17 +125,15 @@ def weightGA(sizes,trainingdata,testdata,numIndividual,numGeneration,numGDMStep,
                 del mutant.fitness.values
 
         # Evaluate the individuals with an invalid fitness
-
-        print('generation {}'.format(g))
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
 
         for ind in invalid_ind:
-            ind.fitness.values = evaluate(ind,trainingdata,testdata,numGDMStep)
-
-        bestInd = tools.selBest(pop,1)
-        print(bestInd[0].fitness)
+            ind.fitness.values = evaluate(ind,trainingdata,testdata,numGDMStep,eta)
 
         # The population is entirely replaced by the offspring
         pop[:] = offspring
+
+        bestInd = tools.selBest(pop,1)
+        print("TrainData: {} TestData: {}".format(bestInd[0].fitness , bestInd[0][0].evaluate(testdata)))
     return bestInd[0][0]
 

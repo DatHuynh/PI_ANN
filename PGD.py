@@ -4,10 +4,10 @@ import Network as nw
 import DataSetGenerator as dg
 
 
-def optimizePs(ps,net,us,epoch):
+def optimizePs(ps,net,us,epoch,eta):
     for i in range(epoch):
         delta = PGD(ps,net,us)
-        ps = updatePs(ps,delta)
+        ps = updatePs(ps,delta,eta)
         print(evaluate(ps,net,us))
         print(ps)
 
@@ -40,7 +40,7 @@ def PGD(ps, net, us):
     delta = np.dot(net.weights[0].transpose(),delta)
     return delta
 
-def updatePs(ps,delta):
+def updatePs(ps,delta,eta):
     ps = [p - 0.01*deltap for p,deltap in zip(ps,delta)]
     return ps
 def sigmoid(z):

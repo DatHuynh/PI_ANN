@@ -1,6 +1,6 @@
 __author__ = 'DatHuynh'
 import numpy as np
-
+import random
 
 def computeMeasure1(kdp, kdi, xD, xd):
     if (kdi + (kdp - kdi) * np.sqrt(xD * (2 * xd - xD + 2) / (xd * xd))) < 0:
@@ -46,7 +46,7 @@ def generateData(p1,p2,p3,p4):
     u = computeUs(p1, p2, p3)
     us.append(u)
     if u > 1 or u < 0:
-        print("Fail at Normalize")
+        print("Fail at Normalize p1: {} p2: {} p3: {} u: {}".format(p1,p2,p3,u))
     data.append(np.reshape(ps,(len(ps),1)))
     data.append(np.reshape(us,(len(us),1)))
     return data
@@ -74,6 +74,12 @@ def generateTrainingData():
     dataset.append(generateData(0.12,0.35,0.69,0.35))
     dataset.append(generateData(0.08,0.24,0.66,0.35))
     dataset.append(generateData(0.15,0.11,0.36,0.35))
+
+    dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
+    dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
+    dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
+    dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
+
     return dataset
 
 

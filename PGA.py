@@ -50,8 +50,7 @@ def paraGA(length,net,us):
     CXPB, MUTPB, NGEN = 0.5, 0.2, 50
 
     for g in range(NGEN):
-
-
+        print('generation {}'.format(g))
         # Select the next generation individuals
         offspring = toolbox.select(pop, len(pop))
         # Clone the selected individuals
@@ -70,16 +69,14 @@ def paraGA(length,net,us):
                 del mutant.fitness.values
 
         # Evaluate the individuals with an invalid fitness
-
-        print('generation {}'.format(g))
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitness = map(toolbox.evaluate,pop)
-        for ind,fit in zip(pop,fitness):
+        fitness = map(toolbox.evaluate,invalid_ind)
+        for ind,fit in zip(invalid_ind,fitness):
             ind.fitness.values = fit
+        # The population is entirely replaced by the offspring
+        pop[:] = offspring
 
         bestInd = tools.selBest(pop,1)
         print(bestInd[0].fitness)
 
-        # The population is entirely replaced by the offspring
-        pop[:] = offspring
     return np.reshape(bestInd[0],(len(bestInd[0]),1))

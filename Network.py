@@ -14,25 +14,23 @@ class Network:
         #self.weights = [np.zeros((y,x)) for x,y in zip(sizes[:-1],sizes[1:])]
         self.biases = [np.random.randn(y,1) for y in sizes[1:]]
 
-    def updateNetwork(self,training_data):
+    def updateNetwork(self,training_data,eta):
         error_w = [np.zeros(w.shape) for w in self.weights]
         error_b = [np.zeros(b.shape) for b in self.biases]
         for dataset in training_data:
             error_t_w, error_t_b = self.backProp(dataset)
             error_b = [b + deltab for b, deltab in zip(error_b, error_t_b)]
             error_w = [w + deltaw for w, deltaw in zip(error_w, error_t_w)]
-        self.weights = [w - 0.01*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
-        self.biases = [b - 0.01*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
+        self.weights = [w - eta*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
+        self.biases = [b - eta*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
 
-    def GD(self, training_data, test_data, epoch, isReport = False):
+    def GD(self, training_data, test_data, epoch, eta, isReport = False):
         for i in range(epoch):
-            self.updateNetwork(training_data)
+            self.updateNetwork(training_data,eta)
             if isReport is True:
                 test_error = self.evaluate(test_data)
                 train_error = self.evaluate(training_data)
-                print("Let see test: {} train: {}".format(test_error,train_error))
-                if test_error < np.power(self.threshold,2):
-                    print('Debug')
+                print("Let see TrainData: {} TestData: {}".format(train_error,test_error))
             if self.isTerminate(training_data):
                 return 1
         return 0
@@ -42,6 +40,7 @@ class Network:
 
         for i in range(len(ep)):
             if(np.abs(ep[i]) < self.threshold):
+                print("Reduce training is occurring :)");
                 p = np.exp( np.log(self.alpha)*np.square(10/9)*np.square( (ep[i]-self.threshold)/self.threshold ) )
                 delta[i] *= p
 
@@ -52,6 +51,7 @@ class Network:
             for i in range(len(ep)):
                 if(np.abs(ep[i]) > self.threshold):
                     return False
+        print("Terminate condition :)")
         return True
 
     def feedforward(self,activation):
