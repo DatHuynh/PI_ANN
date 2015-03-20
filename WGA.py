@@ -69,13 +69,14 @@ def weightGA(sizes,trainingdata,testdata,numIndividual,numGeneration,numGDMStep,
 
     print('Initializing')
     # Evaluate the entire population
+    '''
     fitnesses = map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     '''
     for ind in pop:
-        ind.fitness.values = evaluate(ind,trainindata,testdata)
-    '''
+        ind.fitness.values = evaluate(ind,trainingdata,testdata,numGDMStep)
+
     bestInd = tools.selBest(pop,1)
     print(bestInd[0].fitness)
 
@@ -102,8 +103,8 @@ def weightGA(sizes,trainingdata,testdata,numIndividual,numGeneration,numGDMStep,
                 net2 = child2[0]
                 convertToArray(net1.weights,wlist1)
                 convertToArray(net2.weights,wlist2)
-                convertToArray(net1.weights,blist1)
-                convertToArray(net2.weights,blist2)
+                convertToArray(net1.biases,blist1)
+                convertToArray(net2.biases,blist2)
                 toolbox.mate(wlist1, wlist2)
                 toolbox.mate(blist1, blist2)
                 convertToWeights(wlist1,net1.weights)
@@ -129,9 +130,8 @@ def weightGA(sizes,trainingdata,testdata,numIndividual,numGeneration,numGDMStep,
         print('generation {}'.format(g))
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
 
-        fitnesses = map(toolbox.evaluate, pop)
-        for ind, fit in zip(pop, fitnesses):
-            ind.fitness.values = fit
+        for ind in invalid_ind:
+            ind.fitness.values = evaluate(ind,trainingdata,testdata,numGDMStep)
 
         bestInd = tools.selBest(pop,1)
         print(bestInd[0].fitness)
