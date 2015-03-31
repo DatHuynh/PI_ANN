@@ -24,14 +24,14 @@ class Network:
         self.weights = [w - eta*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
         self.biases = [b - eta*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
 
-    def GD(self, training_data, test_data, epoch, eta, isReport = False):
+    def GD(self, training_data, test_data, epoch, eta, isReduce = True):
         for i in range(epoch):
             self.updateNetwork(training_data,eta)
-            if isReport is True:
+            if test_data is not None:
                 test_error = self.evaluate(test_data)
                 train_error = self.evaluate(training_data)
                 print("Let see TrainData: {} TestData: {}".format(train_error,test_error))
-            if self.isTerminate(training_data):
+            if isReduce and self.isTerminate(training_data):
                 return 1
         return 0
 
@@ -40,7 +40,7 @@ class Network:
 
         for i in range(len(ep)):
             if(np.abs(ep[i]) < self.threshold):
-                print("Reduce training is occurring :)");
+                #print("Reduce training is occurring :)");
                 p = np.exp( np.log(self.alpha)*np.square(10/9)*np.square( (ep[i]-self.threshold)/self.threshold ) )
                 delta[i] *= p
 

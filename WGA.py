@@ -7,9 +7,9 @@ import DataSetGenerator as dg
 def createNetwork(sizes):
     return nw.Network(sizes,0.01,0.001)
 
-def evaluate(individual,trainingdata,testdata,numGDMStep,eta):
+def evaluate(individual,trainingdata,numGDMStep,eta):
     net = individual[0]
-    net.GD(trainingdata,testdata,numGDMStep,eta)
+    net.GD(trainingdata,None,numGDMStep,eta,isReduce=False)
     return net.evaluate(trainingdata),
 
 def cxTwoPointCopy(ind1, ind2):
@@ -75,10 +75,11 @@ def weightGA(sizes,trainingdata,testdata,eta ,numIndividual,numGeneration,numGDM
         ind.fitness.values = fit
     '''
     for ind in pop:
-        ind.fitness.values = evaluate(ind,trainingdata,testdata,numGDMStep,eta)
+        ind.fitness.values = evaluate(ind,trainingdata,numGDMStep,eta)
 
-    bestInd = tools.selBest(pop,1)
-    print("TrainData: {} TestData: {}".format(bestInd[0].fitness,bestInd[0][0].evaluate(testdata)))
+    if testdata is not None:
+        bestInd = tools.selBest(pop,1)
+        print("TrainData: {} TestData: {}".format(bestInd[0].fitness,bestInd[0][0].evaluate(testdata)))
 
     wlist1 = [0 for i in range(nW)]
     wlist2 = [0 for i in range(nW)]
@@ -128,12 +129,12 @@ def weightGA(sizes,trainingdata,testdata,eta ,numIndividual,numGeneration,numGDM
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
 
         for ind in invalid_ind:
-            ind.fitness.values = evaluate(ind,trainingdata,testdata,numGDMStep,eta)
+            ind.fitness.values = evaluate(ind,trainingdata,numGDMStep,eta)
 
         # The population is entirely replaced by the offspring
         pop[:] = offspring
-
         bestInd = tools.selBest(pop,1)
-        print("TrainData: {} TestData: {}".format(bestInd[0].fitness , bestInd[0][0].evaluate(testdata)))
+        if testdata is not None:
+            print("TrainData: {} TestData: {}".format(bestInd[0].fitness , bestInd[0][0].evaluate(testdata)))
     return bestInd[0][0]
 

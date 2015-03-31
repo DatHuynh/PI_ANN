@@ -22,13 +22,14 @@ def cxTwoPointCopy(ind1, ind2):
 
 def evaluate(ps,net,us):
     us_net = net.feedforward(np.reshape(ps,(len(ps),1)))
-    r_dg,r_net = 0,0
+    r_net = 0
     for i in range(len(us)):
         r_net += np.power((us_net[i] - us[i])/us[i],2)
-    return np.sqrt(r_net/len(us))
+    k = np.sqrt(r_net/len(us))
+    return k
 
 
-def paraGA(length,net,us):
+def paraGA(length,net,us,numIndividual,numGeneration,crossOverPB, mutantPB):
 
     creator.create("FitnessMin",base.Fitness,weights = (-0.1,))
     creator.create("Individual",np.ndarray,fitness = creator.FitnessMin)
@@ -42,14 +43,12 @@ def paraGA(length,net,us):
     toolbox.register("select", tools.selTournament, tournsize=3)
     toolbox.register("evaluate",evaluate,net = net,us = us)
 
-    pop = toolbox.population(n=1000)
+    pop = toolbox.population(n=numIndividual)
     fitness = map(toolbox.evaluate,pop)
     for ind,fit in zip(pop,fitness):
         ind.fitness.values = fit
 
-    CXPB, MUTPB, NGEN = 0.5, 0.2, 50
-
-    for g in range(NGEN):
+    for g in range(numGeneration):
         print('generation {}'.format(g))
         # Select the next generation individuals
         offspring = toolbox.select(pop, len(pop))
@@ -58,13 +57,13 @@ def paraGA(length,net,us):
 
         # Apply crossover and mutation on the offspring
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() < CXPB:
+            if random.random() < crossOverPB:
                 toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
 
         for mutant in offspring:
-            if random.random() < MUTPB:
+            if random.random() < mutantPB:
                 toolbox.mutate(mutant)
                 del mutant.fitness.values
 
@@ -78,5 +77,7 @@ def paraGA(length,net,us):
 
         bestInd = tools.selBest(pop,1)
         print(bestInd[0].fitness)
+        if bestInd[0].fitness < 0.01:
+            break
 
     return np.reshape(bestInd[0],(len(bestInd[0]),1))

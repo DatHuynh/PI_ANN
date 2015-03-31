@@ -16,7 +16,7 @@ def computeMeasure2(kdp, kdr, xD, xd):
 
 def computeUs(p1, p2, p3):
     #u = np.sin(p1 * 3.14 / 2) * np.exp(p2)/2 + np.sqrt(p3 * 30)/11
-    u = np.sin(p1 * 3.14 / 2) * np.exp(p2)/(p3 * 30)
+    u = np.sin(p1 * 3.14 / 2) * np.exp(p2)/((p3+1)*30)
     return u
 
 
@@ -70,7 +70,8 @@ def generateTrainingData():
                 dataset.append(generateData(p1,p2,p3,0.35))
 
     #scatter data
-    dataset.append(generateData(0.33,0.44,0.55,0.35))
+    '''
+    dataset.append(generateData(0.33,0.44,0.55,0.35))       #fail :)
     dataset.append(generateData(0.12,0.35,0.69,0.35))
     dataset.append(generateData(0.08,0.24,0.66,0.35))
     dataset.append(generateData(0.15,0.11,0.36,0.35))
@@ -79,7 +80,7 @@ def generateTrainingData():
     dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
     dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
     dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
-
+    '''
     return dataset
 
 
