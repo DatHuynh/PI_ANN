@@ -75,7 +75,6 @@ def generateTrainingData():
     dataset.append(generateData(0.12,0.35,0.69,0.35))
     dataset.append(generateData(0.08,0.24,0.66,0.35))
     dataset.append(generateData(0.15,0.11,0.36,0.35))
-
     dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
     dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))
     dataset.append(generateData(random.random(),random.random(),random.random(),random.random()))

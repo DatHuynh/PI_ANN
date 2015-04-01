@@ -48,6 +48,7 @@ def paraGA(length,net,us,numIndividual,numGeneration,crossOverPB, mutantPB):
     for ind,fit in zip(pop,fitness):
         ind.fitness.values = fit
 
+
     for g in range(numGeneration):
         print('generation {}'.format(g))
         # Select the next generation individuals
@@ -77,7 +78,7 @@ def paraGA(length,net,us,numIndividual,numGeneration,crossOverPB, mutantPB):
 
         bestInd = tools.selBest(pop,1)
         print(bestInd[0].fitness)
-        if bestInd[0].fitness < 0.01:
+        if bestInd[0].fitness.values[0] < 0.01:
             break
 
     return np.reshape(bestInd[0],(len(bestInd[0]),1))

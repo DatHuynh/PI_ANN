@@ -4,14 +4,38 @@ import Network as nw
 import DataSetGenerator as dg
 
 
+'''
 def optimizePs(ps,net,us,epoch,eta):
+    psPre = np.zeros((1,1))
+    preTolerance, curTolerance = 0,0
     for i in range(epoch):
         delta = PGD(ps,net,us)
         psPre = ps = updatePs(ps,delta,eta)
         print(evaluateTolerance(ps,net,us))
+        #print(evaluate(ps,net,us))
         print(ps)
         if(not isInRange(ps,0,1)):
             return psPre
+    return ps
+
+'''
+
+def optimizePs(ps,net,us,epoch,eta):
+    psPre = None
+    preError = -1
+    for i in range(epoch):
+        delta = PGD(ps,net,us)
+        ps = updatePs(ps,delta,eta)
+        curError = evaluate(ps,net,us)
+        print('Ps: {} Tolerance: {}'.format(ps,evaluateTolerance(ps,net,us)))
+        if preError != -1 and curError > preError:
+            ps = psPre
+            eta /= 10
+            print('Adjust eta')
+        psPre = ps
+        if(not isInRange(ps,0,1)):
+            return psPre
+        preError = curError
     return ps
 
 def evaluateTolerance(ps,net,us):
@@ -23,6 +47,13 @@ def evaluateTolerance(ps,net,us):
         r_net += np.power((us_net[i] - us[i])/us[i],2)
     tolerance = np.abs(np.sqrt(r_dg/len(us)) -np.sqrt(r_net/len(us)))
     return tolerance
+
+def evaluate(ps,net,us):
+    us_net = net.feedforward(np.reshape(ps,(len(ps),1)))
+    r_dg,r_net = 0,0
+    for i in range(len(us)):
+        r_net += np.power((us_net[i] - us[i])/us[i],2)
+    return np.sqrt(r_net/len(us))
 
 def PGD(ps, net, us):
     activation = ps

@@ -77,6 +77,8 @@ def weightGA(sizes,trainingdata,testdata,eta ,numIndividual,numGeneration,numGDM
     for ind in pop:
         ind.fitness.values = evaluate(ind,trainingdata,numGDMStep,eta)
 
+
+
     if testdata is not None:
         bestInd = tools.selBest(pop,1)
         print("TrainData: {} TestData: {}".format(bestInd[0].fitness,bestInd[0][0].evaluate(testdata)))
