@@ -7,11 +7,15 @@ import FileHelper as fh
 import PGA
 import numpy as np
 
-sizes = [3,3,1]
-answerPs = [0.2664499,0.5221133,0.88982]
-trainingdata = dg.generateTrainingData()            #this is the slow down factor
-testdata = dg.generateTestData()
-us = np.reshape(dg.computeUs(answerPs[0],answerPs[1],answerPs[2]),(1,1))
+'''
+Haven't normalize
+'''
+
+sizes = [20,3,204]
+#answerPs = [0.2664499,0.5221133,0.88982]
+trainingdata = fh.loadTrainingReal('Ps','Us',sizes[0],sizes[2])            #this is the slow down factor
+testdata = None
+us = None
 success = False
 t = 1
 
@@ -51,7 +55,7 @@ while success is False:
     if(PGD.evaluateTolerance(ps,net,us) < 0.01):
         success = True
     else:
-        trainingdata.append( dg.generateData(ps[0],ps[1],ps[2],0.35))
-        fh.saveTrainingDataSet(trainingdata,'trainingdata')
         t += 1
+    trainingdata.append( dg.generateData(ps[0],ps[1],ps[2],0.35))
+    fh.saveTrainingDataSet(trainingdata,'trainingdata')
     #net.feedforward(np.reshape([0.1,0.1,0.3],(3,1)))

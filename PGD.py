@@ -27,14 +27,14 @@ def optimizePs(ps,net,us,epoch,eta):
         delta = PGD(ps,net,us)
         ps = updatePs(ps,delta,eta)
         curError = evaluate(ps,net,us)
-        print('Ps: {} Tolerance: {}'.format(ps,evaluateTolerance(ps,net,us)))
+        print('Ps: {} Error: {} Tolerance: {}'.format(ps,curError,evaluateTolerance(ps,net,us)))
         if preError != -1 and curError > preError:
             ps = psPre
-            eta /= 10
+            eta /= 2
             print('Adjust eta')
-        psPre = ps
         if(not isInRange(ps,0,1)):
             return psPre
+        psPre = ps
         preError = curError
     return ps
 

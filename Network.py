@@ -13,6 +13,9 @@ class Network:
         self.weights = [np.random.randn(y,x) for x,y in zip(sizes[:-1],sizes[1:])]
         #self.weights = [np.zeros((y,x)) for x,y in zip(sizes[:-1],sizes[1:])]
         self.biases = [np.random.randn(y,1) for y in sizes[1:]]
+        self.preWeights = None
+        self.preBiases = None
+        self.preError = None
 
     def updateNetwork(self,training_data,eta):
         error_w = [np.zeros(w.shape) for w in self.weights]
@@ -27,12 +30,25 @@ class Network:
     def GD(self, training_data, test_data, epoch, eta, isReduce = True):
         for i in range(epoch):
             self.updateNetwork(training_data,eta)
+
             if test_data is not None:
                 test_error = self.evaluate(test_data)
-                train_error = self.evaluate(training_data)
                 print("Let see TrainData: {} TestData: {}".format(train_error,test_error))
-            if isReduce and self.isTerminate(training_data):
-                return 1
+            if isReduce:
+                train_error = self.evaluate(training_data)
+
+                print(train_error)
+                if self.preError is not None and self.preError <= train_error:
+                    self.weights = self.preWeights
+                    self.biases = self.preBiases
+                    eta /= 2
+                    print('Adjust eta: {}'.format(eta))
+                self.preError = train_error
+                self.preWeights = [np.copy(w) for w in self.weights]
+                self.preBiases = [np.copy(b) for b in self.biases]
+
+                if self.isTerminate(training_data):
+                    return 1
         return 0
 
     def reduceTraining(self, dataset, activation, delta):
