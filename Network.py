@@ -36,8 +36,8 @@ class Network:
                 print("Let see TrainData: {} TestData: {}".format(train_error,test_error))
             if isReduce:
                 train_error = self.evaluate(training_data)
-
-                print(train_error)
+                if epoch % 100 == 0:
+                    print('epoch: {} training Error: {}'.format(i,train_error))
                 if self.preError is not None and self.preError <= train_error:
                     self.weights = self.preWeights
                     self.biases = self.preBiases

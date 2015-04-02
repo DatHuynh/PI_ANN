@@ -14,5 +14,5 @@ net.biases = fh.loadWeightJson('BiasesOpti')
 
 print(PGD.optimizePs(ps,net,us,epoch=10000,eta=0.1))
 '''
-arr = fh.loadTrainingReal('Ps','Us',20,204)
 
+trainingdata = fh.loadTrainingReal('Ps','Us',20,204,9,215999,1,31)            #this is the slow down factor

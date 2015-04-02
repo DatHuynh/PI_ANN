@@ -45,24 +45,35 @@ def loadTrainingDataSet(filename):
         trainingdata.append(dg.generateData(ele[0],ele[1],ele[2],0.35))
     return trainingdata
 
-def loadUs(fu,sizeU):
+def loadUsContinue(fu,sizeU,minU,maxU):
     us = np.zeros((sizeU,1))
     counter = 0
     for i in range(0,sizeU,3):
         for e in fu.readline().split():
-            us[counter] = np.float64(e)
+            us[counter] = normalize(np.float64(e),minU,maxU)
+            if us[counter] < 0:
+                print('Negative number Us')
             counter += 1
     return us
 
 
-def loadTrainingReal(filenameP,filenameU, sizeP,sizeU):
+def loadPsContinue(fp, maxP, minP, sizeP):
+    ps = np.zeros((sizeP,1))
+    for i,e in enumerate(ps):
+        ps[i] = normalize(np.float64(fp.readline()), minP, maxP)
+        if ps[i] < 0:
+            print('Negative number Ps')
+    return ps
+
+
+def loadTrainingReal(filenameP,filenameU, sizeP,sizeU,minP,maxP,minU,maxU):
     fp = open(filenameP+'.txt','r')
     fu = open(filenameU+'.txt','r')
     dataset = []
     while fp.readline() is not '' and fu.readline() is not '':
         data = []
-        ps = [np.float64(fp.readline()) for i in range(sizeP)]
-        us = loadUs(fu,sizeU)
+        ps = loadPsContinue(fp, maxP, minP, sizeP)
+        us = loadUsContinue(fu,sizeU,minU,maxU)
         data.append(np.reshape(ps,(sizeP,1)))
         data.append(np.reshape(us,(sizeU,1)))
         dataset.append(data)
@@ -70,8 +81,35 @@ def loadTrainingReal(filenameP,filenameU, sizeP,sizeU):
     fu.close()
     return dataset
 
-def loadTargetUs(filename,size):
+def loadUs(filename,size,minU,maxU):
     f = open(filename+'.txt','r')
-    us = loadUs(f,size)
+    f.readline()
+    us = loadUsContinue(f,size,minU,maxU)
     f.close()
     return us
+
+def saveVecContinue(f,vec,idx):
+    f.write('-----Data{}\n'.format(idx))
+    for u in vec:
+        f.write(str(u[0]))
+        f.write('\n')
+
+def saveVec(filename,vec):
+    f = open(filename+'.txt','w')
+    saveVecContinue(f,vec,0)
+    f.close()
+
+def saveTrainingReal(filenameP,filenameU,dataset):
+    fp = open(filenameP+'.txt','w')
+    fu = open(filenameU+'.txt','w')
+    for i,data in enumerate(dataset):
+        saveVecContinue(fp,data[0],i)
+        saveVecContinue(fu,data[1],i)
+    fp.close()
+    fu.close()
+
+def normalize(e,min,max):
+    return (e-min)/(max-min)
+
+def deNormalize(e,min,max):
+    return e*(max-min)+min

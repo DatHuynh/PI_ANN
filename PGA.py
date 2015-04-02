@@ -4,7 +4,6 @@ from deap import base, creator,tools
 import random
 import numpy as np
 import Network as nw
-import DataSetGenerator as dg
 
 def cxTwoPointCopy(ind1, ind2):
     size = len(ind1)
@@ -64,8 +63,12 @@ def paraGA(length,net,us,numIndividual,numGeneration,crossOverPB, mutantPB):
                 del child2.fitness.values
 
         for mutant in offspring:
+            if not isInRange(mutant,0,1):
+                print('Nan')
             if random.random() < mutantPB:
                 toolbox.mutate(mutant)
+                if not isInRange(mutant,0,1):
+                    print('Nan')
                 del mutant.fitness.values
 
         # Evaluate the individuals with an invalid fitness
@@ -82,3 +85,9 @@ def paraGA(length,net,us,numIndividual,numGeneration,crossOverPB, mutantPB):
             break
 
     return np.reshape(bestInd[0],(len(bestInd[0]),1))
+
+def isInRange(ps,min,max):
+    for p in ps:
+        if p <= min or p >= max:
+            return False
+    return True
