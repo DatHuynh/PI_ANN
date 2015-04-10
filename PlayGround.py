@@ -11,7 +11,7 @@ import numpy as np
 Haven't normalize
 '''
 
-sizes = [20,10,204]
+sizes = [20,10,102]
 #answerPs = [0.2664499,0.5221133,0.88982]
 #10,216000,1.12,30.31
 trainingdata = fh.loadTrainingReal('Ps','Us',sizes[0],sizes[2],9,215999,0.1,31)            #this is the slow down factor
@@ -22,12 +22,14 @@ t = 1
 
 #while success is False:
 #800
+'''
 print("#PI {}".format(t))
-net = WGA.weightGA(sizes,trainingdata,testdata,eta=0.001,numIndividual= 50,numGeneration=1,numGDMStep=10,crossOverPB= 0.5, mutantPB= 0.2)
+net = WGA.weightGA(sizes,trainingdata,testdata,eta=0.001,numIndividual= 50,numGeneration=800,numGDMStep=10,crossOverPB= 0.5, mutantPB= 0.2)
 fh.saveWeightJson(net.weights,"WeightsRaw")
 fh.saveWeightJson(net.biases,"BiasesRaw")
 
 print("End Of WGA Pharse - TrainData: {}".format(net.evaluate(trainingdata)))
+
 
 #threshold is better at 0.028
 net = nw.Network(sizes,threshold= 0.02,alpha=0.001)
@@ -35,21 +37,21 @@ net.weights = fh.loadWeightJson("WeightsRaw")
 net.biases = fh.loadWeightJson("BiasesRaw")
 
 #100000
-net.GD(trainingdata,None,epoch=1,eta=0.001)
+net.GD(trainingdata,None,epoch=100000,eta=0.001)
 fh.saveWeightJson(net.weights,"WeightsOpti")
 fh.saveWeightJson(net.biases,"BiasesOpti")
 
-print("End Of W optimize Pharse - TrainData: {}".format(net.evaluate(trainingdata)))
-
+'''
 net = nw.Network(sizes,threshold= 0.02,alpha=0.001)
 net.weights = fh.loadWeightJson("WeightsOpti")
 net.biases = fh.loadWeightJson("BiasesOpti")
+print("End Of W optimize Pharse - TrainData: {}".format(net.evaluate(trainingdata)))
 #100
-ps = PGA.paraGA(sizes[0],net,usTarget, numIndividual=10, numGeneration=100,crossOverPB=0.5,mutantPB=0.3)
+ps = PGA.paraGA(sizes[0],net,usTarget, numIndividual=1000, numGeneration=100,crossOverPB=0.5,mutantPB=0.3)
 
 print("End Of PGA phrase - NetError: {}".format(PGA.evaluate(ps,net,usTarget)))
 #10000
-ps = PGD.optimizePs(ps,net,usTarget,epoch=10,eta=0.01)       #eta is not good -- dynamic eta
+ps = PGD.optimizePs(ps,net,usTarget,epoch=10000,eta=0.001)       #eta is not good -- dynamic eta
 
 print("End Of P optimize phrase - NetError: {}".format(PGA.evaluate(ps,net,usTarget)))
 

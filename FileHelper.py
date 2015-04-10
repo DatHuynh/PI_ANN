@@ -109,7 +109,10 @@ def saveTrainingReal(filenameP,filenameU,dataset):
     fu.close()
 
 def normalize(e,min,max):
-    return (e-min)/(max-min)
+    return e
+    #return (e-min)/(max-min)
+
 
 def deNormalize(e,min,max):
-    return e*(max-min)+min
+    return e
+    #return e*(max-min)+min
