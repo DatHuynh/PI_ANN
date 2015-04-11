@@ -17,20 +17,25 @@ def initPs(container):
     max = 1
     Ps = container(np.zeros(len(ranges)))
     for i in range(0,len(ranges)):
-        if i > 0 and i%2 != 0:
-            low = (Ps[i-2]*(ranges[i-2][max]-ranges[i-2][min]) + ranges[i-2][min] - range[i][min])/(range[i][max]-range[i][min])
+        if i > 0 and i%2 == 0:
+            low = (Ps[i-2]*(ranges[i-2][max]-ranges[i-2][min]) + ranges[i-2][min] - ranges[i][min])/(ranges[i][max]-ranges[i][min])
             if low > 0:
                 Ps[i] = random.random()*(1.0-low)+low
             else:
                 Ps[i] = random.random()
         else:
             Ps[i] = random.random()
+    return Ps
 
 def adjustConstraint(Ps):
+    min = 0
+    max = 1
     for i in range(0,len(ranges)):
-        if i > 0 and i%2 != 0:
-            low = (Ps[i-2]*(ranges[i-2][max]-ranges[i-2][min]) + ranges[i-2][min] - range[i][min])/(range[i][max]-range[i][min])
-            if low > 0:
+        if i > 0 and i%2 == 0:
+            deNormalize1 = Ps[i-2]*(ranges[i-2][max]-ranges[i-2][min]) + ranges[i-2][min]
+            deNormalize2 = Ps[i]*(ranges[i][max]-ranges[i][min])+ranges[i][min]
+            low = (deNormalize1 - ranges[i][min])/(ranges[i][max]-ranges[i][min])
+            if deNormalize1 > deNormalize2:
                 Ps[i] = random.random()*(1.0-low)+low
 
 
@@ -54,6 +59,8 @@ def evaluate(ps,net,us):
     for i in range(len(us)):
         r_net += np.power((us_net[i] - us[i])/us[i],2)
     k = np.sqrt(r_net/len(us))
+    if np.isnan(k):
+        print('')
     return k
 
 
@@ -67,7 +74,7 @@ def paraGA(length,net,us,numIndividual,numGeneration,crossOverPB, mutantPB):
     toolbox.register("population",tools.initRepeat,list,toolbox.individual)
 
     toolbox.register("mate", cxTwoPointCopy)
-    toolbox.register("mutate", tools.mutPolynomialBounded, eta = 0.5, low = 0, up = 0, indpb=0.5)
+    toolbox.register("mutate", tools.mutPolynomialBounded, eta = 0.8, low = 0, up = 1, indpb=0.6)
     toolbox.register("select", tools.selTournament, tournsize=3)
     toolbox.register("evaluate",evaluate,net = net,us = us)
 

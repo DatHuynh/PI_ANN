@@ -10,7 +10,7 @@ import numpy as np
 '''
 Haven't normalize
 '''
-
+ps = None
 sizes = [20,10,102]
 #answerPs = [0.2664499,0.5221133,0.88982]
 #10,216000,1.12,30.31
@@ -45,17 +45,16 @@ fh.saveWeightJson(net.biases,"BiasesOpti")
 net = nw.Network(sizes,threshold= 0.02,alpha=0.001)
 net.weights = fh.loadWeightJson("WeightsOpti")
 net.biases = fh.loadWeightJson("BiasesOpti")
-print("End Of W optimize Pharse - TrainData: {}".format(net.evaluate(trainingdata)))
+#print("End Of W optimize Pharse - TrainData: {}".format(net.evaluate(trainingdata)))
 #100
-ps = PGA.paraGA(sizes[0],net,usTarget, numIndividual=1000, numGeneration=100,crossOverPB=0.5,mutantPB=0.3)
-
-print("End Of PGA phrase - NetError: {}".format(PGA.evaluate(ps,net,usTarget)))
+#ps = PGA.paraGA(sizes[0],net,usTarget, numIndividual=100, numGeneration=500,crossOverPB=0.5,mutantPB=0.3)
+#fh.saveVec('PsSuggest',ps)
+#print("End Of PGA phrase - NetError: {}".format(PGA.evaluate(ps,net,usTarget)))
 #10000
-ps = PGD.optimizePs(ps,net,usTarget,epoch=10000,eta=0.001)       #eta is not good -- dynamic eta
-
+ps = fh.loadPs('PsSuggest',sizes[0])
+#ps = PGD.optimizePs(ps,net,usTarget,epoch=10000,eta=0.001)       #eta is not good -- dynamic eta
+#fh.saveVec('PsSuggestOpti',ps)
 print("End Of P optimize phrase - NetError: {}".format(PGA.evaluate(ps,net,usTarget)))
-
-fh.saveVec('PsSuggest',ps)
 
 confirm = input('Please enter Us Model: ')
 
@@ -69,5 +68,5 @@ if confirm == 'Yes':
     if(tolerance < 0.01):
         print('Success')
 
-    fh.saveTrainingReal('Ps{}'.format_map(len(trainingdata)+1),'Us{}'.format(len(trainingdata)+1),trainingdata)
+    fh.saveTrainingReal('Ps{}'.format(len(trainingdata)+1),'Us{}'.format(len(trainingdata)+1),trainingdata)
     #net.feedforward(np.reshape([0.1,0.1,0.3],(3,1)))

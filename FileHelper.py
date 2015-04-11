@@ -88,6 +88,13 @@ def loadUs(filename,size,minU,maxU):
     f.close()
     return us
 
+def loadPs(filename,size):
+    f = open(filename+'.txt','r')
+    f.readline()
+    ps = loadPsContinue(f,0,0,size)
+    f.close()
+    return ps
+
 def saveVecContinue(f,vec,idx):
     f.write('-----Data{}\n'.format(idx))
     for u in vec:
