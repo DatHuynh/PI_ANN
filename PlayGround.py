@@ -35,7 +35,7 @@ net.weights = fh.loadWeightJson("WeightsRaw")
 net.biases = fh.loadWeightJson("BiasesRaw")
 
 #100000
-net.GD(trainingdata,None,epoch=100000,eta=0.001)
+net.GD(trainingdata,None,epoch=100000,eta=0.01)
 fh.saveWeightJson(net.weights,"WeightsOpti")
 fh.saveWeightJson(net.biases,"BiasesOpti")
 

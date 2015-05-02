@@ -73,7 +73,7 @@ class Network:
     def feedforward(self,activation):
         for w,b in zip(self.weights,self.biases):
             z = np.dot(w,activation)+b
-            activation = sigmoid_vec(z)
+            activation = ReLU_vec(z)
         return activation
 
     def backProp(self, dataset):
@@ -90,18 +90,18 @@ class Network:
         for b,w in zip(self.biases,self.weights):
             z = np.dot(w,activation)+b
             zs.append(z)
-            activation = sigmoid_vec(z)
+            activation = ReLU_vec(z)
             activations.append(activation)
 
         #backpropagation
 
-        delta = self.cost_derivative(activations[-1],y)*sigmoid_prime_vec(zs[-1])
+        delta = self.cost_derivative(activations[-1],y)*ReLU_prime_vec(zs[-1])
         self.reduceTraining(dataset,activation,delta)
         error_b[-1] = delta
         error_w[-1] = np.dot(delta,activations[-2].transpose())
 
         for l in range(2,self.numLayers):
-            delta = np.dot(self.weights[-l+1].transpose(),delta)*sigmoid_prime_vec(zs[-l])
+            delta = np.dot(self.weights[-l+1].transpose(),delta)*ReLU_prime_vec(zs[-l])
             error_b[-l] = delta
             error_w[-l] = np.dot(delta,activations[-l-1].transpose())
 
@@ -127,9 +127,23 @@ class Network:
 def sigmoid(z):
     return 1.0/(1.0 + np.exp(-z))
 
+def ReLU(z):
+    if z >= 0:
+        return z
+    else:
+        return 0.01*z
+
+ReLU_vec = np.vectorize(ReLU)
 sigmoid_vec = np.vectorize(sigmoid)
 
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
+def ReLU_prime(z):
+    if z >= 0:
+        return 1
+    else:
+        return 0.01
+
+ReLU_prime_vec = np.vectorize(ReLU_prime)
 sigmoid_prime_vec = np.vectorize(sigmoid_prime)
