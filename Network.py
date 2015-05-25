@@ -5,11 +5,13 @@ import numpy as np
 #bias crossover missing
 
 class Network:
-    def __init__(self, sizes, threshold, alpha):
+    def __init__(self, sizes, threshold, alpha, ld, eta):
         self.numLayers = len(sizes)
         self.sizes = sizes
         self.threshold = threshold
         self.alpha = alpha
+        self.ld = ld
+        self.eta = eta
         self.weights = [np.random.randn(y,x) for x,y in zip(sizes[:-1],sizes[1:])]
         #self.weights = [np.zeros((y,x)) for x,y in zip(sizes[:-1],sizes[1:])]
         self.biases = [np.random.randn(y,1) for y in sizes[1:]]
@@ -17,19 +19,19 @@ class Network:
         self.preBiases = None
         self.preError = None
 
-    def updateNetwork(self,training_data,eta):
+    def updateNetwork(self,training_data):
         error_w = [np.zeros(w.shape) for w in self.weights]
         error_b = [np.zeros(b.shape) for b in self.biases]
         for dataset in training_data:
             error_t_w, error_t_b = self.backProp(dataset)
             error_b = [b + deltab for b, deltab in zip(error_b, error_t_b)]
             error_w = [w + deltaw for w, deltaw in zip(error_w, error_t_w)]
-        self.weights = [w - eta*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
-        self.biases = [b - eta*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
+        self.weights = [(1-self.eta*self.ld)*w - self.eta*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
+        self.biases = [b - self.eta*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
 
-    def GD(self, training_data, test_data, epoch, eta, isReduce = True):
+    def GD(self, training_data, test_data, epoch, isReduce=True):
         for i in range(epoch):
-            self.updateNetwork(training_data,eta)
+            self.updateNetwork(training_data)
 
             if test_data is not None:
                 test_error = self.evaluate(test_data)
@@ -41,8 +43,8 @@ class Network:
                 if self.preError is not None and self.preError <= train_error:
                     self.weights = self.preWeights
                     self.biases = self.preBiases
-                    eta /= 2
-                    print('Adjust eta: {}'.format(eta))
+                    self.eta /= 2
+                    print('Adjust eta: {}'.format(self.eta))
                 self.preError = train_error
                 self.preWeights = [np.copy(w) for w in self.weights]
                 self.preBiases = [np.copy(b) for b in self.biases]
@@ -116,7 +118,9 @@ class Network:
         for a,y in zip(activation,y):
             rd += np.power((y-a)/y,2)
             #rd += np.power(y-a,2)
-        return rd/len(activation)
+        rd /= len(activation)
+        rd += 0.5*self.ld*sum(np.linalg.norm(w)**2 for w in self.weights)
+        return rd
 
     def evaluate(self,dataset):
         rt = 0

@@ -48,7 +48,7 @@ def loadTrainingDataSet(filename):
 def loadUsContinue(fu,sizeU,minU,maxU):
     us = np.zeros((sizeU,1))
     counter = 0
-    for i in range(0,sizeU,3):
+    for i in range(0,sizeU,4):
         for e in fu.readline().split():
             us[counter] = normalize(np.float64(e),minU,maxU)
             if us[counter] < 0:
@@ -123,3 +123,52 @@ def normalize(e,min,max):
 def deNormalize(e,min,max):
     return e
     #return e*(max-min)+min
+
+def FormatPs(filenameO,filenameW,dimData,numData):
+
+    f = open(filenameO+'.txt','r')
+    arr = []
+    for i in range(dimData):
+        arr.append(f.readline().split())
+    f.close()
+
+    #sanity check
+    if len(arr) != dimData:
+        print('Insane')
+    if len(arr[0]) != numData:
+        print('Insane 2')
+
+    f = open(filenameW+'.txt','w')
+    for i in range(numData):
+        f.write('-----Data'+str(i)+'\n')
+        for j in range(dimData):
+            f.write(arr[j][i]+'\n')
+    f.close()
+
+def FormatUs(filenameO,filenameW,width,height,numData):
+
+    f = open(filenameO+'.txt','r')
+    arr = []
+    for i in range(height):
+        arr.append(f.readline().split())
+    f.close()
+
+    #sanity check
+    if len(arr) != height:
+        print('Insane')
+    if len(arr[0]) != width*numData:
+        print('Insane 2')
+
+    f = open(filenameW+'.txt','w')
+    for i in range(numData):
+        f.write('-----Data'+str(i)+'\n')
+        for j in range(height):
+            for k in range(width):
+                f.write(arr[j][i+k]+' ')
+            f.write('\n')
+    f.close()
+
+
+#Test
+FormatPs('RawPs','PsBeta',20,48)
+FormatUs('RawUs','UsBeta',4,35,48)

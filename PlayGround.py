@@ -11,8 +11,8 @@ import numpy as np
 Haven't normalize
 '''
 ps = None
-sizes = [20,10,102]
-trainingdata = fh.loadTrainingReal('Ps','Us',sizes[0],sizes[2],9,215999,0.1,31)            #this is the slow down factor
+sizes = [20,10,140]
+trainingdata = fh.loadTrainingReal('PsBeta','UsBeta',sizes[0],sizes[2],9,215999,0.1,31)            #this is the slow down factor
 testdata = None
 usTarget = fh.loadUs('UsTarget',sizes[2],0.1,31)
 success = False
