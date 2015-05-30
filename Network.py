@@ -5,13 +5,11 @@ import numpy as np
 #bias crossover missing
 
 class Network:
-    def __init__(self, sizes, threshold, alpha, ld, eta):
+    def __init__(self, sizes, threshold, alpha):
         self.numLayers = len(sizes)
         self.sizes = sizes
         self.threshold = threshold
         self.alpha = alpha
-        self.ld = ld
-        self.eta = eta
         self.weights = [np.random.randn(y,x) for x,y in zip(sizes[:-1],sizes[1:])]
         #self.weights = [np.zeros((y,x)) for x,y in zip(sizes[:-1],sizes[1:])]
         self.biases = [np.random.randn(y,1) for y in sizes[1:]]
@@ -19,19 +17,19 @@ class Network:
         self.preBiases = None
         self.preError = None
 
-    def updateNetwork(self,training_data):
+    def updateNetwork(self,training_data,eta):
         error_w = [np.zeros(w.shape) for w in self.weights]
         error_b = [np.zeros(b.shape) for b in self.biases]
         for dataset in training_data:
             error_t_w, error_t_b = self.backProp(dataset)
             error_b = [b + deltab for b, deltab in zip(error_b, error_t_b)]
             error_w = [w + deltaw for w, deltaw in zip(error_w, error_t_w)]
-        self.weights = [(1-self.eta*self.ld)*w - self.eta*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
-        self.biases = [b - self.eta*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
+        self.weights = [w - eta*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
+        self.biases = [b - eta*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
 
-    def GD(self, training_data, test_data, epoch, isReduce=True):
+    def GD(self, training_data, test_data, epoch, eta, isReduce = True):
         for i in range(epoch):
-            self.updateNetwork(training_data)
+            self.updateNetwork(training_data,eta)
 
             if test_data is not None:
                 test_error = self.evaluate(test_data)
@@ -43,8 +41,10 @@ class Network:
                 if self.preError is not None and self.preError <= train_error:
                     self.weights = self.preWeights
                     self.biases = self.preBiases
-                    self.eta /= 2
-                    print('Adjust eta: {}'.format(self.eta))
+                    eta /= 2
+                    print('Adjust eta: {}'.format(eta))
+                    if eta < 0.0001:
+                        return 0
                 self.preError = train_error
                 self.preWeights = [np.copy(w) for w in self.weights]
                 self.preBiases = [np.copy(b) for b in self.biases]
@@ -75,7 +75,7 @@ class Network:
     def feedforward(self,activation):
         for w,b in zip(self.weights,self.biases):
             z = np.dot(w,activation)+b
-            activation = ReLU_vec(z)
+            activation = sigmoid_vec(z)
         return activation
 
     def backProp(self, dataset):
@@ -92,18 +92,18 @@ class Network:
         for b,w in zip(self.biases,self.weights):
             z = np.dot(w,activation)+b
             zs.append(z)
-            activation = ReLU_vec(z)
+            activation = sigmoid_vec(z)
             activations.append(activation)
 
         #backpropagation
 
-        delta = self.cost_derivative(activations[-1],y)*ReLU_prime_vec(zs[-1])
+        delta = self.cost_derivative(activations[-1],y)*sigmoid_prime_vec(zs[-1])
         self.reduceTraining(dataset,activation,delta)
         error_b[-1] = delta
         error_w[-1] = np.dot(delta,activations[-2].transpose())
 
         for l in range(2,self.numLayers):
-            delta = np.dot(self.weights[-l+1].transpose(),delta)*ReLU_prime_vec(zs[-l])
+            delta = np.dot(self.weights[-l+1].transpose(),delta)*sigmoid_prime_vec(zs[-l])
             error_b[-l] = delta
             error_w[-l] = np.dot(delta,activations[-l-1].transpose())
 
@@ -118,9 +118,7 @@ class Network:
         for a,y in zip(activation,y):
             rd += np.power((y-a)/y,2)
             #rd += np.power(y-a,2)
-        rd /= len(activation)
-        rd += 0.5*self.ld*sum(np.linalg.norm(w)**2 for w in self.weights)
-        return rd
+        return rd/len(activation)
 
     def evaluate(self,dataset):
         rt = 0
@@ -129,25 +127,12 @@ class Network:
         return np.sqrt(rt/len(dataset))
 
 def sigmoid(z):
-    return 1.0/(1.0 + np.exp(-z))
+    res = 1.0/(1.0 + np.exp(-z))
+    return res
 
-def ReLU(z):
-    if z >= 0:
-        return z
-    else:
-        return 0.01*z
-
-ReLU_vec = np.vectorize(ReLU)
 sigmoid_vec = np.vectorize(sigmoid)
 
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
-def ReLU_prime(z):
-    if z >= 0:
-        return 1
-    else:
-        return 0.01
-
-ReLU_prime_vec = np.vectorize(ReLU_prime)
 sigmoid_prime_vec = np.vectorize(sigmoid_prime)

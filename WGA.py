@@ -4,12 +4,12 @@ import random
 import Network as nw
 import DataSetGenerator as dg
 
-def createNetwork(sizes,eta):
-    return nw.Network(sizes,0.01,0.001,ld = 0.1,eta = eta)
+def createNetwork(sizes):
+    return nw.Network(sizes,0.01,0.001)
 
-def evaluate(individual,trainingdata,numGDMStep):
+def evaluate(individual,trainingdata,numGDMStep,eta):
     net = individual[0]
-    net.GD(trainingdata,None,numGDMStep,isReduce=False)
+    net.GD(trainingdata,None,numGDMStep,eta,isReduce=False)
     return net.evaluate(trainingdata),
 
 def cxTwoPointCopy(ind1, ind2):
@@ -48,14 +48,14 @@ def weightGA(sizes,trainingdata,testdata,eta ,numIndividual,numGeneration,numGDM
     creator.create("Individual",list,fitness = creator.FitnessMin)
 
     toolbox = base.Toolbox()
-    toolbox.register("Init",createNetwork,sizes,eta)
+    toolbox.register("Init",createNetwork,sizes)
     toolbox.register("individual",tools.initRepeat,creator.Individual, toolbox.Init,1)
     toolbox.register("population",tools.initRepeat,list,toolbox.individual)
 
     toolbox.register("mate", cxTwoPointCopy)
     toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
     toolbox.register("select", tools.selTournament, tournsize=3)
-    toolbox.register("evaluate",evaluate,trainingdata = trainingdata, numGDMStep = numGDMStep)
+    toolbox.register("evaluate",evaluate,trainingdata = trainingdata, testdata = testdata,numGDMStep = numGDMStep)
 
     pop = toolbox.population(n=numIndividual)
     nW,nB = 0,0
@@ -75,7 +75,7 @@ def weightGA(sizes,trainingdata,testdata,eta ,numIndividual,numGeneration,numGDM
         ind.fitness.values = fit
     '''
     for ind in pop:
-        ind.fitness.values = evaluate(ind,trainingdata = trainingdata, numGDMStep = numGDMStep)
+        ind.fitness.values = evaluate(ind,trainingdata,numGDMStep,eta)
 
 
 
@@ -131,7 +131,7 @@ def weightGA(sizes,trainingdata,testdata,eta ,numIndividual,numGeneration,numGDM
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
 
         for ind in invalid_ind:
-            ind.fitness.values = evaluate(ind,trainingdata = trainingdata, numGDMStep = numGDMStep)
+            ind.fitness.values = evaluate(ind,trainingdata,numGDMStep,eta)
 
         # The population is entirely replaced by the offspring
         pop[:] = offspring
@@ -141,4 +141,3 @@ def weightGA(sizes,trainingdata,testdata,eta ,numIndividual,numGeneration,numGDM
         else:
             print("TrainData: {}".format(bestInd[0].fitness))
     return bestInd[0][0]
-

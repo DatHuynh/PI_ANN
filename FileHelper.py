@@ -170,5 +170,5 @@ def FormatUs(filenameO,filenameW,width,height,numData):
 
 
 #Test
-FormatPs('RawPs','PsBeta',20,48)
-FormatUs('RawUs','UsBeta',4,35,48)
+FormatPs('RawPs','PsBeta',10,22)
+FormatUs('RawUs','UsBeta',4,35,22)

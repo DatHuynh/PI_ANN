@@ -32,9 +32,10 @@ def optimizePs(ps,net,usTarget,epoch,eta):
             print('Adjust eta')
         if(not isInRange(ps,0,1)):
             print('Out of range')
-            return psPre
+            #return psPre
         psPre = np.copy(ps)
         preError = curError
+        print(curError)
     return ps
 
 def evaluateTolerance(ps,net,usModel,usTarget):
