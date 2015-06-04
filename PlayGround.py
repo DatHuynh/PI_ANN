@@ -8,7 +8,7 @@ import PGA
 import numpy as np
 
 '''
-Haven't normalize
+Fuck me, next time do cross-validation before doing anything
 '''
 ps = None
 sizes = [10,8,140]
@@ -24,7 +24,7 @@ eta = 0.03
 print(len(trainingdata))
 
 print("#PI {}".format(t))
-net = WGA.weightGA(sizes,trainingdata,testdata,eta=eta,numIndividual= 50,numGeneration=800,numGDMStep=10,crossOverPB= 0.5, mutantPB= 0.2)
+net = WGA.weightGA(sizes,trainingdata,testdata,eta=eta,numIndividual= 50,numGeneration=800,numGDMStep=10,crossOverPB= 0.5, mutantPB= 0.5)
 fh.saveWeightJson(net.weights,"WeightsRaw")
 fh.saveWeightJson(net.biases,"BiasesRaw")
 
@@ -39,7 +39,7 @@ print("End Of WGA Pharse - TrainData: {}".format(net.evaluate(trainingdata)))
 #100000
 net.GD(trainingdata,None,epoch=10000,eta=eta)
 print("Save weight")
-fh.saveWeightJson(net.weights,"W1eightsOpti")
+fh.saveWeightJson(net.weights,"WeightsOpti")
 fh.saveWeightJson(net.biases,"BiasesOpti")
 
 net.GD(trainingdata,None,epoch=10000,eta=eta)

@@ -3,7 +3,7 @@ __author__ = 'DatHuynh'
 import numpy as np
 
 #bias crossover missing
-
+#Cost function modification: add const in denominator to avoid divide by 0. Is there any side effect?? Skip through error if it is small enough ?? Don't know
 class Network:
     def __init__(self, sizes, threshold, alpha):
         self.numLayers = len(sizes)
@@ -54,7 +54,7 @@ class Network:
         return 0
 
     def reduceTraining(self, dataset, activation, delta):
-        ep = (activation - dataset[1])/(dataset[1])
+        ep = (activation - dataset[1])/(dataset[1]+0.001)
 
         for i in range(len(ep)):
             if(np.abs(ep[i]) < self.threshold):
@@ -110,13 +110,13 @@ class Network:
         return (error_w,error_b)
 
     def cost_derivative(self,activation,y):
-        return 2*(activation-y)/(y*y)
+        return 2*(activation-y)/((y+0.001)*(y+0.001))
         #return 2*(activation-y)
 
     def cost(self,activation,y):
         rd = 0
         for a,y in zip(activation,y):
-            rd += np.power((y-a)/y,2)
+            rd += np.power((y-a)/(y+0.001),2)
             #rd += np.power(y-a,2)
         return rd/len(activation)
 

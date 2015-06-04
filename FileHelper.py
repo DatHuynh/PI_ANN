@@ -164,11 +164,11 @@ def FormatUs(filenameO,filenameW,width,height,numData):
         f.write('-----Data'+str(i)+'\n')
         for j in range(height):
             for k in range(width):
-                f.write(arr[j][i+k]+' ')
+                f.write(arr[j][i*width+k]+' ')
             f.write('\n')
     f.close()
 
 
 #Test
-FormatPs('RawPs','PsBeta',10,22)
-FormatUs('RawUs','UsBeta',4,35,22)
+#FormatPs('RawPs','PsBeta',10,22)
+FormatUs('RawUs','UsBeta',4,35,33)
