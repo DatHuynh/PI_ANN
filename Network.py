@@ -4,6 +4,7 @@ import numpy as np
 
 #bias crossover missing
 #Cost function modification: add const in denominator to avoid divide by 0. Is there any side effect?? Skip through error if it is small enough ?? Don't know
+const = 0.00001
 class Network:
     def __init__(self, sizes, threshold, alpha):
         self.numLayers = len(sizes)
@@ -13,19 +14,23 @@ class Network:
         self.weights = [np.random.randn(y,x) for x,y in zip(sizes[:-1],sizes[1:])]
         #self.weights = [np.zeros((y,x)) for x,y in zip(sizes[:-1],sizes[1:])]
         self.biases = [np.random.randn(y,1) for y in sizes[1:]]
-        self.preWeights = None
-        self.preBiases = None
-        self.preError = None
 
-    def updateNetwork(self,training_data,eta):
+    def updateNetwork(self,training_data, eta):
         error_w = [np.zeros(w.shape) for w in self.weights]
         error_b = [np.zeros(b.shape) for b in self.biases]
+        n = len(training_data)
         for dataset in training_data:
             error_t_w, error_t_b = self.backProp(dataset)
             error_b = [b + deltab for b, deltab in zip(error_b, error_t_b)]
             error_w = [w + deltaw for w, deltaw in zip(error_w, error_t_w)]
         self.weights = [w - eta*deltaw / len(training_data) for w, deltaw in zip(self.weights, error_w)]
         self.biases = [b - eta*deltab / len(training_data) for b, deltab in zip(self.biases, error_b)]
+        '''
+        self.weights = [(1-eta*(lmbda/n))*w-(eta/len(training_data))*nw
+                        for w, nw in zip(self.weights, error_w)]
+        self.biases = [b-(eta/len(training_data))*nb
+                       for b, nb in zip(self.biases, error_b)]
+        '''
 
     def GD(self, training_data, test_data, epoch, eta, isReduce = True):
         for i in range(epoch):
@@ -34,27 +39,18 @@ class Network:
             if test_data is not None:
                 test_error = self.evaluate(test_data)
                 print("Let see TrainData: {} TestData: {}".format(train_error,test_error))
-            if isReduce:
-                train_error = self.evaluate(training_data)
-                if epoch % 100 == 0:
-                    print('epoch: {} training Error: {}'.format(i,train_error))
-                if self.preError is not None and self.preError <= train_error:
-                    self.weights = self.preWeights
-                    self.biases = self.preBiases
-                    eta /= 2
-                    print('Adjust eta: {}'.format(eta))
-                    if eta < 0.0001:
-                        return 0
-                self.preError = train_error
-                self.preWeights = [np.copy(w) for w in self.weights]
-                self.preBiases = [np.copy(b) for b in self.biases]
 
+            if epoch % 100 == 0:
+                train_error = self.evaluate(training_data)
+                print('epoch: {} training Error: {}'.format(i,train_error))
+
+            if isReduce:
                 if self.isTerminate(training_data):
                     return 1
         return 0
 
     def reduceTraining(self, dataset, activation, delta):
-        ep = (activation - dataset[1])/(dataset[1]+0.001)
+        ep = (activation - dataset[1])/(dataset[1]+const)
 
         for i in range(len(ep)):
             if(np.abs(ep[i]) < self.threshold):
@@ -110,13 +106,13 @@ class Network:
         return (error_w,error_b)
 
     def cost_derivative(self,activation,y):
-        return 2*(activation-y)/((y+0.001)*(y+0.001))
+        return 2*(activation-y)/((y+const)*(y+const))
         #return 2*(activation-y)
 
     def cost(self,activation,y):
         rd = 0
         for a,y in zip(activation,y):
-            rd += np.power((y-a)/(y+0.001),2)
+            rd += np.power((y-a)/(y+const),2)
             #rd += np.power(y-a,2)
         return rd/len(activation)
 

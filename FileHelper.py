@@ -66,14 +66,14 @@ def loadPsContinue(fp, maxP, minP, sizeP):
     return ps
 
 
-def loadTrainingReal(filenameP,filenameU, sizeP,sizeU,minP,maxP,minU,maxU):
+def loadTrainingReal(filenameP,filenameU, sizeP,sizeU):
     fp = open(filenameP+'.txt','r')
     fu = open(filenameU+'.txt','r')
     dataset = []
     while fp.readline() is not '' and fu.readline() is not '':
         data = []
-        ps = loadPsContinue(fp, maxP, minP, sizeP)
-        us = loadUsContinue(fu,sizeU,minU,maxU)
+        ps = loadPsContinue(fp, 0, 0, sizeP)
+        us = loadUsContinue(fu,sizeU,0,0)
         data.append(np.reshape(ps,(sizeP,1)))
         data.append(np.reshape(us,(sizeU,1)))
         dataset.append(data)
@@ -170,5 +170,5 @@ def FormatUs(filenameO,filenameW,width,height,numData):
 
 
 #Test
-#FormatPs('RawPs','PsBeta',10,22)
-FormatUs('RawUs','UsBeta',4,35,33)
+#FormatPs('RawPs','PsBeta',10,29)
+#FormatUs('RawUs','UsBeta',4,35,29)

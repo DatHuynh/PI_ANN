@@ -7,12 +7,9 @@ import FileHelper as fh
 import PGA
 import numpy as np
 
-'''
-Fuck me, next time do cross-validation before doing anything
-'''
 ps = None
 sizes = [10,8,140]
-trainingdata = fh.loadTrainingReal('PsBeta','UsBeta',sizes[0],sizes[2],9,215999,0.1,31)            #this is the slow down factor
+trainingdata = fh.loadTrainingReal('PsBeta','UsBeta',sizes[0],sizes[2])            #this is the slow down factor
 testdata = None
 usTarget = fh.loadUs('UsTarget',sizes[2],0.1,31)
 success = False
@@ -82,3 +79,13 @@ if confirm == 'Yes':
 
     fh.saveTrainingReal('Ps{}'.format(len(trainingdata)+1),'Us{}'.format(len(trainingdata)+1),trainingdata)
     #net.feedforward(np.reshape([0.1,0.1,0.3],(3,1)))
+'''
+
+net = nw.Network(sizes,threshold= thresholdTerminate,alpha=0.001)
+net.weights = fh.loadWeightJson("WeightsOpti")
+net.biases = fh.loadWeightJson("BiasesOpti")
+print("End Of W optimize Pharse - TrainData: {}".format(net.evaluate(trainingdata)))
+
+ps = fh.loadPs('PsSuggestOpti',sizes[0])
+print("End Of P optimize phrase - NetError: {}".format(PGA.evaluate(ps,net,usTarget)))
+'''
